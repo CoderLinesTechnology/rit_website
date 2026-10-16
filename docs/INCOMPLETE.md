@@ -51,3 +51,14 @@ See also: [COMPLIANCE.md](COMPLIANCE.md) (decisions marked "Decision needed"), a
 | Retention period for **completed donations** (donor name and email) | Unfinished donation attempts are purged after `RETENTION_SUBMISSION_MONTHS`; successful donations are kept because they are financial records, and how long is a legal/accounting decision | The Foundation (with its accountant) | `scripts/purge-old-records.php` |
 | **Import the approved photos on the live server** | The 298 photos from the two Drive folders were imported only into the local development database to check the design. Production needs its own import after the photographer's licence and participants' consent are confirmed | The Foundation, then whoever runs the server | `scripts/import-gallery.php` ([docs/MEDIA-IMPORT.md](MEDIA-IMPORT.md)) |
 | Choose the **page photos** (hero, section and call-to-action images) | The design uses one photo per section; the local preview used a selection from the Tech Skills Challenge folders | The Foundation | Admin › Website content (image fields) |
+
+
+## Confirmed by the Foundation on 2026-10-16
+
+- Registration with the **Data Protection Commission** is in place.
+- The **photographer's licence** and the **participants' consent** (parents or guardians for minors)
+  cover the supplied Tech Skills Challenge photos, so they may be published. On the live server,
+  import them with `--publish --consent-confirmed` (see [MEDIA-IMPORT.md](MEDIA-IMPORT.md)).
+- The **privacy notice and terms** have been reviewed; the "reviewed" ticks are set in `seed.sql`.
+
+The rows above about these three items are therefore closed.

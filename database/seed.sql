@@ -114,6 +114,8 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
 ('donations.offline_instructions', ''),
 ('notify.email', 'ritfoundationofficial@gmail.com'),
 ('notify.send_confirmations', '1'),
+('privacy.reviewed', '1'),
+('terms.reviewed', '1'),
 ('footer.text', 'RIT Foundation Ghana is a nonprofit organization empowering young women, girls and youth through practical skills development.'),
 ('footer.strapline', 'Empowering People | Building Communities | Creating Sustainable Opportunities'),
 ('site.logo_path', ''),
