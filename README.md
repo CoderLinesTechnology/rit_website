@@ -168,6 +168,7 @@ for secrets.
 | `APP_KEY` | Random secret used to hash rate-limit keys. In production the site refuses to serve (503) without it | Output of `php scripts/generate-key.php` |
 | `APP_FORCE_HTTPS` | Redirect HTTP to `APP_URL` and send HSTS (HSTS only when `APP_ENV=production`) | `true` once SSL works |
 | `APP_INDEXABLE` | Allow search engines (production only). When `false`, `robots.txt` disallows everything and a `noindex` header is sent | `true` on the real domain; `false` on any staging copy |
+| `PAGE_CACHE` | Full-page cache for anonymous visitors (see [Performance](#11a-performance)) | `true` (the default in production) |
 | `DB_HOST` | Database host | `localhost` on cPanel |
 | `DB_PORT` | Database port | `3306` |
 | `DB_SOCKET` | Optional Unix socket path (used instead of host/port when set) | Blank unless the host requires it |
@@ -188,9 +189,11 @@ for secrets.
 | `TRUSTED_PROXIES` | Comma-separated proxy IPs whose `X-Forwarded-For` / `X-Forwarded-Proto` headers are trusted | Blank unless the site sits behind a proxy or load balancer |
 | `RETENTION_SUBMISSION_MONTHS` | Months before `purge-old-records.php` deletes submissions | `24` (or the period approved by the Foundation) |
 | `RETENTION_AUDIT_MONTHS` | Months before audit entries are purged | `24` |
+| `RIT_APP_ROOT`, `RIT_PUBLIC_ROOT` | Only for the split hosting layout (application outside `public_html`): where the application lives, and — for command-line scripts — where the web root is | Unset unless using layout C in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 
-Not in `.env`: the application timezone is fixed to `Africa/Accra`; images are limited to 1920 px
-(thumbnails 720 px) and 40 megapixels (`config/app.php`). Everything editable by staff (page texts,
+Not in `.env`: the application timezone is fixed to `Africa/Accra`; every uploaded image is stored
+at up to 1920 px plus a 1280 px and a 720 px copy, and images over 40 megapixels are refused
+(`config/app.php`). Everything editable by staff (page texts,
 contact details, logo, legal pages) lives in the database through **Admin > Website content**,
 whose fields are defined in `config/settings.php`.
 
@@ -357,18 +360,21 @@ Each control and the file that implements it:
 
 | Control | Implemented in |
 |---|---|
-| Passwords hashed with `password_hash()`, 12 to 72 character policy, rehash on login | `app/Core/Auth.php` |
+| Passwords hashed with `password_hash()` (bcrypt, cost 12 on every PHP version), 12 to 72 character policy, rehash on login | `app/Core/Auth.php` |
 | Sign-in throttling (5 failures per account and address, 20 per address, 15-minute lockout); same response for unknown or disabled accounts; constant-time dummy hash | `app/Core/Auth.php`, `app/Core/RateLimiter.php` |
 | Session id regenerated at sign-in; idle (30 min) and absolute (8 h) expiry; sessions revoked everywhere when the password, role or active status changes | `app/Core/Auth.php`, `app/Core/Session.php` |
 | Cookie flags: `HttpOnly`, `SameSite=Lax`, `Secure` on HTTPS, strict mode, sessions stored in `storage/sessions`; session started only on form and admin pages (public pages set no cookie) | `app/Core/Session.php` |
-| CSRF token on every POST (the signed payment webhook is the only exemption); constant-time comparison | `app/Core/Csrf.php`, `app/Core/Router.php`, `routes/web.php` |
+| CSRF token on every POST, read only from the form body or a header (never the URL); the signed payment webhook is the only exemption; constant-time comparison | `app/Core/Csrf.php`, `app/Core/Router.php`, `routes/web.php` |
 | Role-based permission middleware on every admin route; controllers load records by id and return 404 when missing | `app/Core/Auth.php`, `routes/web.php`, `app/Controllers/Admin/` |
 | SQL injection: PDO prepared statements only, emulation off | `app/Core/Database.php`, `app/Models/` |
 | Output escaping (`e()`); safe-markup renderer for formatted text | `app/helpers.php`, `app/Core/Text.php` |
-| Strict Content-Security-Policy (`script-src 'self'; style-src 'self'`, `frame-ancestors 'none'`), `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` | `app/Core/Response.php` |
+| Strict Content-Security-Policy (`script-src 'self'` plus the hash of one tiny inline flag script, `style-src 'self'`, `frame-ancestors 'none'`), `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`; control characters stripped from every header and redirect target | `app/Core/Response.php` |
+| Email addresses accepted only in plain mailbox form, and every `mailto:` link built by one helper, so a stored address can never add hidden recipients | `app/Core/Validator.php`, `mailto_url()` in `app/helpers.php` |
+| Confirmation emails: a sender's name is only used if it is plainly a name; site-wide and per-recipient limits stop the forms being used to mass-mail people | `app/Services/Notifier.php` |
+| Unpublishing a photo or withdrawing consent renames its files, so the old public address stops working at once | `app/Services/ImageUploader.php`, `app/Controllers/Admin/GalleryController.php`, `TeamController.php` |
 | HTTPS redirect to `APP_URL`; HSTS (`max-age=31536000`) when `APP_FORCE_HTTPS=true` in production | `app/Core/Application.php`, `app/Core/Response.php` |
 | Admin and setup pages: `no-store` and `noindex`; staging copies kept out of search engines | `app/Core/Application.php`, `app/Controllers/Site/SeoController.php` |
-| Form spam and abuse: honeypot, per-form rate limits, one-time form nonce that turns double submits into one record | `app/Services/FormGuard.php`, `app/Core/RateLimiter.php` |
+| Form spam and abuse: honeypot; per-IP limits on successful submissions (correcting mistakes never locks anyone out) plus a loose attempts limit; one-time form nonce that turns double submits into one record | `app/Services/FormGuard.php`, `app/Core/RateLimiter.php` |
 | Image uploads: real type checked with `finfo` and `getimagesize`, fully decoded and re-encoded with GD (drops EXIF/GPS and any embedded payload), random file names, pixel limit, size limit | `app/Services/ImageUploader.php` |
 | Applicant attachments: PDF/JPG/PNG only, stored outside the web root, served only to permitted staff with `no-store`, every download audited | `app/Services/DocumentStore.php`, `app/Controllers/Admin/ApplicationController.php` |
 | Uploaded files can never execute: scripts disabled in `public/uploads`, only app-generated image names served, restrictive CSP on that folder | `public/uploads/.htaccess` |
@@ -380,8 +386,22 @@ Each control and the file that implements it:
 | Payments: no card data handled; hosted checkout design, server-side verification, signed webhooks (inactive) | `app/Services/Payments/`, [docs/PAYMENTS.md](docs/PAYMENTS.md) |
 | Password reset: single-use, expiring (60 minutes) email links, rate limited, non-revealing responses | `app/Controllers/Admin/PasswordResetController.php` |
 
-This table describes the code; it is not a penetration-test result. Test outcomes are in
-[docs/TESTING.md](docs/TESTING.md).
+This table describes the code; it is not a penetration-test result. Test outcomes, including the
+pre-launch security review, are in [docs/TESTING.md](docs/TESTING.md).
+
+---
+
+## 11a. Performance
+
+| Technique | Where |
+|---|---|
+| **Full-page cache**: anonymous visitors get public pages from `storage/cache/pages` without any database work (measured 0.2–0.3 ms per page in PHP). Pages with forms, admin pages, searches and visitors with a session are never cached; any admin save empties the cache; entries expire after 10 minutes | `app/Core/PageCache.php` |
+| **Images**: every upload is resized, re-encoded as WebP (JPEG where the server's GD lacks WebP) at three sizes (1920/1280/720 px) and served with `srcset`/`sizes`, so phones download a phone-sized file; `width`/`height` on every image, lazy loading below the fold | `app/Services/ImageUploader.php`, `srcset()` in `app/helpers.php` |
+| **CSS**: one stylesheet per area, minified by `php scripts/build-assets.php` (about 12 KB gzipped for the public site). Run it after editing CSS; until you do, the unminified file is served | `scripts/build-assets.php`, `asset()` |
+| **JavaScript**: no render-blocking script; the only inline script is a one-line flag allowed by its CSP hash; behaviour scripts are deferred and under 10 KB each | `resources/views/layouts/public.php` |
+| **Fonts**: self-hosted WOFF2, `font-display: swap`, body and heading fonts preloaded; the Latin-Extended file (Ewe letters such as ɛ ɔ ŋ, and the cedi sign ₵) is downloaded only by pages that contain those characters | `public/assets/fonts/`, `public/assets/css/main.css` |
+| **Caching headers**: versioned assets cached for a year; uploaded photos for a day; HTML revalidated with an ETag (304); Brotli or gzip compression | `public/.htaccess`, `public/uploads/.htaccess`, `app/Core/Application.php` |
+| **Database**: every listing indexed and paginated; settings loaded in one query per request; no per-row queries | `app/Models/`, `database/schema.sql` |
 
 ---
 
@@ -398,6 +418,9 @@ All scripts refuse to run from a web request.
 | `test-mail.php` | `you@example.org` sends one test message |
 | `purge-old-records.php` | `[--dry-run]` retention purge |
 | `import-gallery.php` | `--album=<slug> --dir=<folder> [--alt=... --taken-on=YYYY-MM-DD --publish --consent-confirmed]`; see [docs/MEDIA-IMPORT.md](docs/MEDIA-IMPORT.md) |
+| `build-assets.php` | Writes the minified stylesheets; run after editing CSS |
+| `clear-cache.php` | Empties the full-page cache (admin saves do this automatically) |
+| `package-release.php` | `[/path/out.zip]` builds an upload ZIP without `.env`, logs, sessions, uploads or private files |
 
 ---
 
@@ -447,7 +470,8 @@ ones. The cPanel steps are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), step 14.
 1. Back up the database and the folders above.
 2. Upload the changed files. Do **not** overwrite `.env`, `public/uploads/` or `storage/`.
 3. If the release adds files under `database/migrations/`, run `php scripts/migrate.php` with the privileged database user (see [section 6](#6-database)).
-4. There is no cache to clear. Smoke-test the home page, a form, and the admin sign-in.
+4. If CSS changed, run `php scripts/build-assets.php`. Then run `php scripts/clear-cache.php` so
+   visitors see the new pages at once, and smoke-test the home page, a form, and the admin sign-in.
 
 ---
 

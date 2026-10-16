@@ -42,3 +42,12 @@ decide or supply. None of them is a code defect; each blocks or limits going liv
 
 See also: [COMPLIANCE.md](COMPLIANCE.md) (decisions marked "Decision needed"), and
 [TESTING.md](TESTING.md) for what has and has not been tested.
+
+
+## Added after the security and performance review
+
+| Item | Why it matters | Who decides / provides | Where in the system |
+|---|---|---|---|
+| Retention period for **completed donations** (donor name and email) | Unfinished donation attempts are purged after `RETENTION_SUBMISSION_MONTHS`; successful donations are kept because they are financial records, and how long is a legal/accounting decision | The Foundation (with its accountant) | `scripts/purge-old-records.php` |
+| **Import the approved photos on the live server** | The 298 photos from the two Drive folders were imported only into the local development database to check the design. Production needs its own import after the photographer's licence and participants' consent are confirmed | The Foundation, then whoever runs the server | `scripts/import-gallery.php` ([docs/MEDIA-IMPORT.md](MEDIA-IMPORT.md)) |
+| Choose the **page photos** (hero, section and call-to-action images) | The design uses one photo per section; the local preview used a selection from the Tech Skills Challenge folders | The Foundation | Admin › Website content (image fields) |

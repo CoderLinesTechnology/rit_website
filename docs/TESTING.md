@@ -44,7 +44,7 @@ PHP's built-in server against the test database).
 | Security headers | curl | CSP (no `unsafe-inline`; one hashed flag script), X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, COOP; HSTS only in production |
 | Login throttling, role matrix, CSRF, redirects | independent security review with live probes (see section 4) | as reported in section 4 |
 | Photo pipeline at scale | imported the 298 supplied Drive photos (2400 px) with `scripts/import-gallery.php` | 298 imported, 0 failed, all unpublished; 355 MB → 118 MB (3 sizes each) |
-| Responsive layout | headless Chrome at 1440 px and 390 px, `scrollWidth === innerWidth` | no horizontal overflow on the pages shot (home, programs, apply, about, impact, gallery, news, get involved, forms, admin dashboard/lists) |
+| Responsive layout | headless Chrome, `scrollWidth === innerWidth` | no horizontal overflow at 390 px on home, programs, apply, volunteer, partner, contact, donate, about, impact, gallery, news, get involved (checked by the developer); home, programs, apply at 1440 px; admin dashboard, lists and forms at 390/1440 px (checked during development) |
 | Visual comparison with the approved mockups | screenshots compared side by side by the developer | layout, typography, colours and components match; differences listed in section 6 |
 | Performance | in-process timing, MariaDB statement profiling | see section 3 |
 
@@ -76,7 +76,17 @@ APP_ENV fail-safe, session cookie Secure flag and garbage collection, log rotati
 
 ## 5. Final full run
 
-FINAL_RUN_PLACEHOLDER
+Run on 2026-10-16 after every fix in this report, on the same machine:
+
+| PHP | Passed | Failed | Skipped | Notes |
+|---|---|---|---|---|
+| 8.2.4 (XAMPP — the minimum supported version) | 204 | 0 | 1 | skip: "PNG transparency kept in WebP output" — this PHP's GD has no WebP, so the JPEG fallback is used and tested instead |
+| 8.5.7 | 202 | 2 | 1 | both failures were infrastructure on a heavily loaded disk ("test HTTP server did not start" / a request with no connection), not assertions; after allowing the test server 30 s to start, the affected suite was re-run: **AdminAuthTest 15 passed, 0 failed**. skip: "JPEG fallback" — this PHP has WebP, so the fallback path is not exercised |
+
+Earlier in the day, an intermittent failure of the "log driver hand-off" form test was traced to the
+same disk stalls (single requests taking 14–16 s against a 30 s client timeout); the harness timeouts
+were raised and the test passed on re-runs. If you run the suite on a slow machine and see
+`status 0` or "did not start", re-run before investigating the code.
 
 ## 6. Not tested / known differences
 

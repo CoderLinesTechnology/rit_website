@@ -54,7 +54,17 @@ Throw `HttpException` (404/403/419/422/429/503…) to show an error page.
 9. **Destructive actions** are POST forms with `data-confirm="…"` (admin.js asks for confirmation).
 10. **Personal data:** collect only what a form needs; no IP addresses or user agents stored with
     submissions; staff emails contain only references (see `Notifier`).
-11. **Honest states:** never claim an email was "delivered" (outbox status `handed_off` = accepted
+11. **Page cache:** public GET pages are stored and replayed to anonymous visitors
+    (`App\Core\PageCache`). A cacheable page must not contain anything specific to one visitor;
+    anything that needs a session (forms, flash messages) starts one, which keeps that response out
+    of the cache automatically. New query parameters are not cached unless added to the allowlist
+    in `PageCache::eligible()`. Admin POSTs flush the cache; CLI scripts that change content must
+    call `PageCache::flush()`.
+12. **Images in templates:** add `<?= srcset($path, '<sizes>') ?>` to every uploaded `<img>` and give it
+    `width`/`height`; use `mailto_url()` for every email link (never build `mailto:` by hand).
+13. **Assets:** after editing CSS run `php scripts/build-assets.php` (served automatically while
+    newer than the source). Font files are cached as immutable: give a changed font a new file name.
+14. **Honest states:** never claim an email was "delivered" (outbox status `handed_off` = accepted
     by the mail server), never show a donation as successful unless `DonationService` verified it,
     never promise program acceptance.
 

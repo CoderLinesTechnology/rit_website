@@ -666,7 +666,7 @@ test('email: with the log driver the hand-off of a real submission is not marked
     $ref = (string) ft_last('contact_enquiries')['reference'];
     // The server hands the mail off after sending the response; give it a moment.
     $states = [];
-    for ($i = 0; $i < 20; $i++) {
+    for ($i = 0; $i < 100; $i++) { // up to 15 s on a slow machine
         $states = array_values(ft_outbox('contact_enquiries', $ref));
         if (!in_array('queued', $states, true)) {
             break;

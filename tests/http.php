@@ -82,7 +82,7 @@ final class Http
             $env
         );
         register_shutdown_function([self::class, 'stop']);
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < 300; $i++) { // up to 30 s: a busy disk can delay PHP's start-up
             $socket = @fsockopen('127.0.0.1', self::$port, $errno, $errstr, 0.1);
             if ($socket !== false) {
                 fclose($socket);
@@ -143,7 +143,8 @@ final class Http
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADER => true,
             CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_TIMEOUT => 30,
+            // Generous: a slow shared disk can stall the single-threaded test server for many seconds.
+            CURLOPT_TIMEOUT => 90,
             CURLOPT_HTTPHEADER => $headerLines,
         ]);
         if ($body !== null) {

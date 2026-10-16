@@ -335,3 +335,15 @@ Fill in this table and keep it up to date. The developers did not know these det
 | Web hosting provider support | _to be filled in_ | | |
 | Developer (for faults and changes) | _to be filled in_ | | |
 | Email / domain registrar support | _to be filled in_ | | |
+
+
+## Good to know (added after review)
+
+- **Unpublishing a photo or unticking its consent box** gives the photo's files a new name, so any
+  old link to it stops working straight away. Do this as soon as someone asks for a photo to be removed.
+- **Confirmation emails** to people who submit a form are limited (at most 3 a day to the same
+  address and 100 an hour overall) so the forms cannot be used to flood someone's inbox. Staff
+  notifications are not limited.
+- **Pages update within seconds of saving** in the dashboard (the page cache is cleared on every save).
+- People who make **several mistakes** in a form are never locked out; only repeated *successful*
+  submissions from the same connection are limited (for example 5 applications an hour).
