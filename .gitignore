@@ -1,0 +1,21 @@
+.env
+.env.testing
+storage/logs/*
+!storage/logs/.gitkeep
+storage/sessions/*
+!storage/sessions/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+storage/private/applications/*
+!storage/private/applications/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/.htaccess
+# Any environment file except the example
+.env.*
+!.env.example
+# OS, editor and tooling noise
+.DS_Store
+*.log
+*.swp
+node_modules/

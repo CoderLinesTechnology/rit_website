@@ -1,0 +1,58 @@
+# RIT Foundation Ghana — web root rules (Apache 2.4 / cPanel)
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Uncomment to force HTTPS and the www host once SSL is active
+    # (the application also redirects to APP_URL when APP_FORCE_HTTPS=true).
+    # RewriteCond %{HTTPS} !=on
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    # RewriteRule ^ https://www.ritfoundationglobal.com%{REQUEST_URI} [L,R=301]
+    # RewriteCond %{HTTP_HOST} ^ritfoundationglobal\.com$ [NC]
+    # RewriteRule ^ https://www.ritfoundationglobal.com%{REQUEST_URI} [L,R=301]
+
+    # Never serve dotfiles (.env copies, .git, .htaccess), except ACME challenges.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    # Real files (CSS, JS, fonts, uploaded images) are served directly.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Everything else goes to the front controller.
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Block backup and source files that should never be public.
+<FilesMatch "(\.(sql|log|env|ini|sh|bak|old|orig|swp|dist|lock|md|json|yml|yaml|zip|tar|gz|tgz|7z|rar|bk|save|tmp|phps|inc|conf|cnf|dump|csv)|~)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header unset X-Powered-By
+    # Long-lived caching for versioned static assets only (URLs carry ?v=<mtime>).
+    # Uploaded photos set their own, shorter policy in uploads/.htaccess.
+    <If "%{REQUEST_URI} =~ m#^/assets/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+</IfModule>
+
+# Compression: Brotli where the host has it, gzip otherwise (fonts and photos are already compressed).
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml application/javascript application/json image/svg+xml application/xml
+</IfModule>
+<IfModule !mod_brotli.c>
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml application/xml
+    </IfModule>
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+    AddType image/webp .webp
+    AddType image/svg+xml .svg
+</IfModule>

@@ -1,0 +1,25 @@
+# Used ONLY when the whole project has to live inside the web root
+# (hosts that do not allow pointing the domain at the public/ folder).
+# It sends every request into public/ and denies direct access to the
+# application, configuration, storage and database folders.
+# See README "Hosting without changing the document root".
+
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny private folders and files outright.
+    RewriteRule ^(app|config|database|resources|routes|scripts|storage|tests|docs)(/|$) - [F,L]
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule \.(sql|log|env|md|lock|json|sh)$ - [F,L]
+
+    # Everything else is served from public/.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Without mod_rewrite the site cannot run safely from this folder.
+    Require all denied
+</IfModule>
