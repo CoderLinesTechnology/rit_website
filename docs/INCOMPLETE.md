@@ -62,3 +62,7 @@ See also: [COMPLIANCE.md](COMPLIANCE.md) (decisions marked "Decision needed"), a
 - The **privacy notice and terms** have been reviewed; the "reviewed" ticks are set in `seed.sql`.
 
 The rows above about these three items are therefore closed.
+- The **official logo** (supplied 2026-10-16) is built in: `public/assets/images/logo.*` (light
+  backgrounds), `logo-light.*` (dark footer), `logo-on-maroon.*` (admin bar), favicons, the Apple
+  touch icon and the default social-sharing image `og-default.jpg`, all generated from the master in
+  `resources/brand/ritlogo-original.png`. The logo row above is closed.

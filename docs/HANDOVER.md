@@ -347,3 +347,6 @@ Fill in this table and keep it up to date. The developers did not know these det
 - **Pages update within seconds of saving** in the dashboard (the page cache is cleared on every save).
 - People who make **several mistakes** in a form are never locked out; only repeated *successful*
   submissions from the same connection are limited (for example 5 applications an hour).
+- **The logo is built into the website.** You do not need to upload it. The upload fields under
+  Website content › Logo & shared images are only for replacing it in future (provide a version with
+  white lettering for the dark footer too).

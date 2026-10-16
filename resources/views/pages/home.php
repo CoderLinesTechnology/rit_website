@@ -22,7 +22,7 @@ $m = count($metrics) > 4 ? array_slice($metrics, 0, 4) : $metrics;
 // Organization structured data (only fields we actually have).
 $ld = ['@context' => 'https://schema.org', '@type' => 'NGO', 'name' => setting('org.name'), 'url' => (string) config('app.url')];
 if (setting('org.legal_name') !== '') { $ld['legalName'] = setting('org.legal_name'); }
-if (setting('site.logo_path') !== '' && upload_url(setting('site.logo_path')) !== '') { $ld['logo'] = absolute_url(upload_url(setting('site.logo_path'))); }
+$ld['logo'] = upload_url(setting('site.logo_path')) !== '' ? absolute_url(upload_url(setting('site.logo_path'))) : absolute_url('/assets/images/logo.png');
 if (setting('contact.email') !== '') { $ld['email'] = setting('contact.email'); }
 if (setting('contact.phone') !== '') { $ld['telephone'] = setting('contact.phone'); }
 if (preg_match('/^\d{4}$/', setting('org.established_year'))) { $ld['foundingDate'] = setting('org.established_year'); }

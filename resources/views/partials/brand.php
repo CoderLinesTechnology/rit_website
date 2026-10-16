@@ -1,14 +1,22 @@
 <?php
-/** @var string $variant '' | 'light' */
+/**
+ * The logo. vars: $variant '' (light backgrounds) | 'light' (dark backgrounds: white lettering).
+ * Uses an uploaded logo when one is set in Admin › Website content › Logo, otherwise the
+ * official artwork shipped in public/assets/images (logo.webp / logo-light.webp, PNG fallback).
+ */
 $variant = $variant ?? '';
-$logo = (string) setting('site.logo_path', '');
-$motto = trim((string) setting('org.motto', ''));
+$dark = $variant === 'light';
+$uploaded = (string) setting($dark ? 'site.logo_light_path' : 'site.logo_path', '');
+$alt = (string) setting('site.logo_alt', 'RIT Foundation Ghana');
+$file = $dark ? 'logo-light' : 'logo';
 ?>
-<a class="brand<?= $variant === 'light' ? ' brand--light' : '' ?>" href="<?= e(url('/')) ?>"<?= $variant === 'light' ? '' : ' aria-label="RIT Foundation Ghana, home"' ?>>
-<?php if ($logo !== ''): ?>
-  <img class="brand__logo" src="<?= e(upload_url($logo)) ?>" alt="<?= e((string) setting('site.logo_alt', 'RIT Foundation Ghana')) ?>" height="56">
+<a class="brand<?= $dark ? ' brand--light' : '' ?>" href="<?= e(url('/')) ?>"<?= $dark ? '' : ' aria-label="RIT Foundation Ghana, home"' ?>>
+<?php if (upload_url($uploaded) !== ''): ?>
+  <img class="brand__logo" src="<?= e(upload_url($uploaded)) ?>" alt="<?= e($alt) ?>" height="64">
 <?php else: ?>
-  <span class="brand__emblem" aria-hidden="true">R</span>
-  <span class="brand__text"><b>RIT</b>Foundation<br>Ghana<?php if ($motto !== ''): ?><span class="brand__motto"><?= e($motto) ?></span><?php endif; ?></span>
+  <picture>
+    <source srcset="<?= e(asset('images/' . $file . '.webp')) ?>" type="image/webp">
+    <img class="brand__logo" src="<?= e(asset('images/' . $file . '.png')) ?>" alt="<?= e($alt) ?>" width="311" height="192" decoding="async"<?= $dark ? ' loading="lazy"' : '' ?>>
+  </picture>
 <?php endif; ?>
 </a>

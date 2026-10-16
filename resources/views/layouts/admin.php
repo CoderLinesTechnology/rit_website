@@ -25,7 +25,9 @@ $menu = [
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title><?= e(($title ?? 'Admin') . ' | RIT Foundation admin') ?></title>
-<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/assets/images/favicon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= e(asset('css/admin.css')) ?>">
 <script src="<?= e(asset('js/admin.js')) ?>" defer></script>
@@ -37,12 +39,10 @@ $menu = [
   <header class="topbar">
     <button type="button" class="topbar__menu" aria-controls="admin-sidebar" aria-expanded="true"><?= icon('list') ?> Menu</button>
     <a class="topbar__brand" href="<?= e(url('/admin')) ?>">
-<?php if ($logo !== ''): ?>
-      <img src="<?= e(upload_url($logo)) ?>" alt="<?= e((string) setting('site.logo_alt', 'RIT Foundation Ghana')) ?>" height="48">
-<?php else: ?>
-      <span>RIT Foundation Ghana</span>
-<?php if ($motto !== ''): ?><small><?= e($motto) ?></small><?php endif; ?>
-<?php endif; ?>
+      <picture>
+        <source srcset="<?= e(asset('images/logo-on-maroon.webp')) ?>" type="image/webp">
+        <img class="topbar__logo" src="<?= e(asset('images/logo-on-maroon.png')) ?>" alt="RIT Foundation Ghana — administration" width="259" height="160">
+      </picture>
     </a>
 <?php if (can('submissions.manage')): ?>
     <a class="topbar__bell" href="<?= e(url('/admin/applications', ['status' => 'new'])) ?>" aria-label="<?= e($new > 0 ? $new . ' new submissions' : 'Submissions') ?>"><?= icon('inboxes') ?><?php if ($new > 0): ?><span class="count-pill" aria-hidden="true"><?= $new > 99 ? '99+' : $new ?></span><?php endif; ?></a>

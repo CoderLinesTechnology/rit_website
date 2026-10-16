@@ -27,7 +27,7 @@ abstract class Controller
             'title' => trim((string) ($seo['meta_title'] ?? '')) !== '' ? (string) $seo['meta_title'] : $title,
             'description' => trim((string) ($seo['meta_description'] ?? '')) !== '' ? (string) $seo['meta_description'] : \App\Core\Text::excerpt($description, 160),
             'canonical' => $canonical,
-            'ogImage' => ($seo['og_image_path'] ?? null) ?: ($ogImage ?: (Settings::get('site.share_image') ?: null)),
+            'ogImage' => ($seo['og_image_path'] ?? null) ?: ($ogImage ?: (Settings::get('site.share_image') ?: 'assets/images/og-default.jpg')),
             'pageKey' => $pageKey,
         ];
     }

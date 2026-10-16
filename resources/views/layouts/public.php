@@ -35,7 +35,9 @@ $robotsValue = !config('app.indexable') ? 'noindex,nofollow' : (!empty($robots) 
 <meta name="twitter:card" content="summary_large_image">
 <?php endif; ?>
 <meta name="theme-color" content="#9D1D2A">
-<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/assets/images/favicon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/poppins-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= e(asset('css/main.css')) ?>">

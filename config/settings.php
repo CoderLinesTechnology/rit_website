@@ -221,7 +221,8 @@ return [
             'contact.map_embed_url' => ['group' => 'contact', 'label' => 'Google Maps embed link (optional)', 'type' => 'url', 'max' => 500, 'help' => 'Only add a map once a full, verified office address is published. Use the "Embed a map" link from Google Maps (https://www.google.com/maps/embed?...). The map loads from Google, which is noted in the privacy notice.', 'default' => ''],
 
             // Branding and shared images
-            'site.logo_path' => ['group' => 'branding', 'label' => 'Logo (PNG or WebP with a transparent background works best)', 'type' => 'image', 'alt' => 'site.logo_alt', 'default' => ''],
+            'site.logo_path' => ['group' => 'branding', 'label' => 'Logo (optional — the official logo is built in; upload only to replace it)', 'type' => 'image', 'alt' => 'site.logo_alt', 'default' => ''],
+            'site.logo_light_path' => ['group' => 'branding', 'label' => 'Logo for dark backgrounds (footer) — optional, white lettering', 'type' => 'image', 'help' => 'Leave empty to use the official artwork. Only needed if the logo changes.', 'default' => ''],
             'site.logo_alt' => ['group' => 'branding', 'label' => 'Logo description', 'type' => 'text', 'max' => 120, 'default' => 'RIT Foundation Ghana'],
             'site.cta_image' => ['group' => 'branding', 'label' => 'Photo for the call-to-action bands', 'type' => 'image', 'alt' => 'site.cta_image_alt', 'default' => ''],
             'site.cta_image_alt' => ['group' => 'branding', 'label' => 'Call-to-action photo description', 'type' => 'text', 'max' => 200, 'default' => ''],

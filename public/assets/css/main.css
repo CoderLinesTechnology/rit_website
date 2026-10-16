@@ -960,3 +960,9 @@ fieldset.field { border: 0; margin: 0; padding: 0; min-width: 0; }
 .cat-strip ul { width: auto; }
 .cat-strip li:not(.cat-all-wrap) { flex: 1 0 7.5rem; }
 .cat-strip a { min-width: 0; padding-inline: 0.75rem; text-wrap: balance; line-height: 1.3; }
+
+/* Official logo artwork (public/assets/images/logo*.webp): sizes as in the mockups. */
+.brand picture { display: block; line-height: 0; }
+.brand__logo { height: 5.5rem; width: auto; }
+@media (max-width: 47.99rem) { .brand__logo { height: 4rem; } }
+.site-footer .brand__logo { height: 5.5rem; }
